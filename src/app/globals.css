@@ -24,3 +24,47 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* In app/globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tambahkan lapisan (layer) ini untuk style khusus cetak */
+@layer utilities {
+  @media print {
+
+    /* Sembunyikan semua elemen di halaman saat mencetak */
+    body * {
+      visibility: hidden;
+    }
+
+    /* Tampilkan hanya area struk dan semua elemen di dalamnya */
+    .printable-area,
+    .printable-area * {
+      visibility: visible;
+    }
+
+    /* Posisikan area cetak ke sudut kiri atas halaman cetak */
+    .printable-area {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+
+    /* Pastikan warna latar belakang dan teks ikut tercetak dengan benar */
+    .bg-white {
+      background-color: white !important;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .text-black {
+      color: black !important;
+      -webkit-print-color-adjust: exact;
+    }
+
+    /* Tambahkan kelas lain jika diperlukan */
+  }
+}
