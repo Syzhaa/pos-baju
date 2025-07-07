@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { BarChart, DollarSign, Package, Shirt, ShoppingBag, PieChart as PieChartIcon, Activity } from 'lucide-react';
-import { BarChart as RechartsBarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface Transaction {
   id: number;
@@ -29,8 +29,8 @@ export default function DashboardPage() {
         { name: 'Produk Terlaris', value: 'Memuat...', icon: ShoppingBag, color: 'bg-yellow-500' },
     ]);
     const [recentActivity, setRecentActivity] = useState<Transaction[]>([]);
-    const [salesChartData, setSalesChartData] = useState<any[]>([]);
-    const [topProductsData, setTopProductsData] = useState<any[]>([]);
+    const [salesChartData, setSalesChartData] = useState<{name: string; Penjualan: number}[]>([]);
+    const [topProductsData, setTopProductsData] = useState<{name: string; value: number}[]>([]);
 
     useEffect(() => {
         const storedProducts: Product[] = JSON.parse(localStorage.getItem("products") || "[]");

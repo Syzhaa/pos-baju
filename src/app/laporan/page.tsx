@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { FileDown, BarChart, ShoppingBag, ShoppingCart, Landmark } from "lucide-react";
+import { FileDown, ShoppingBag, ShoppingCart, Landmark } from "lucide-react";
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface CartItem {
@@ -15,6 +15,11 @@ interface Transaction {
   items: CartItem[];
   total: number;
 }
+interface ChartData {
+  name: string;
+  Penjualan: number;
+}
+
 
 export default function LaporanPage() {
     const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
@@ -26,7 +31,7 @@ export default function LaporanPage() {
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
     const [stats, setStats] = useState({ totalSales: 0, totalTransactions: 0, bestSelling: 'N/A' });
-    const [chartData, setChartData] = useState<any[]>([]);
+    const [chartData, setChartData] = useState<ChartData[]>([]);
 
     useEffect(() => {
         const storedTransactions: Transaction[] = JSON.parse(localStorage.getItem('transactions') || '[]');
@@ -241,7 +246,7 @@ export default function LaporanPage() {
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="name" />
                                 <YAxis tickFormatter={(value) => `Rp${Number(value) / 1000}k`} />
-                                <Tooltip formatter={(value) => `Rp ${Number(value).toLocaleString('id-ID')}`} />
+                                <Tooltip formatter={(value: number) => `Rp ${value.toLocaleString('id-ID')}`} />
                                 <Legend />
                                 <Bar dataKey="Penjualan" fill="#4338ca" />
                             </RechartsBarChart>

@@ -12,8 +12,7 @@ import {
   ShoppingCart,
   ClipboardList,
   Settings,
-  UserCircle,
-  KeyRound
+  UserCircle
 } from "lucide-react";
 
 // Komponen Modal untuk Ubah Profil/Password
@@ -67,6 +66,7 @@ const ProfileModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
     setSuccess('Profil berhasil diperbarui!');
     setTimeout(() => {
         onClose();
+        window.location.reload(); // Reload to update username in navbar
     }, 1500);
   };
 
