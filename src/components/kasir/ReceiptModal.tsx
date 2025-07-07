@@ -12,76 +12,61 @@ export default function ReceiptModal({ isOpen, onClose, transactionData }: Recei
   const receiptRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = () => {
-    const node = receiptRef.current;
-    if (!node) {
-      alert('Komponen struk tidak ditemukan.');
+    const nodeToPrint = receiptRef.current;
+    if (!nodeToPrint) {
+      alert('Elemen struk tidak ditemukan.');
       return;
     }
 
-    // 1. Ambil semua link stylesheet dari halaman utama.
-    // Ini penting agar style Tailwind CSS ikut tercetak.
-    const styles = Array.from(document.styleSheets)
-      .map(styleSheet => {
-        try {
-          // Salin semua aturan CSS ke dalam tag <style>
-          return Array.from(styleSheet.cssRules)
-            .map(rule => rule.cssText)
-            .join('');
-        } catch (e) {
-          // Beberapa stylesheet eksternal mungkin tidak bisa diakses, abaikan saja.
-          console.log('Tidak bisa mengakses stylesheet:', styleSheet.href);
-          return '';
-        }
-      })
-      .join('\n');
-
-    // 2. Ambil HTML dari komponen struk.
-    const printContent = node.innerHTML;
-
-    // 3. Buka jendela browser baru yang kosong.
-    // Ini jauh lebih stabil di mobile daripada membuat iframe.
-    const printWindow = window.open('', '', 'height=600,width=800');
-
-    if (printWindow) {
-      // 4. Tulis semua konten (HTML + CSS) ke jendela baru.
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Cetak Struk</title>
-            <style>
-              /* Aturan CSS khusus untuk cetak */
-              @page {
-                /* Ukuran kertas printer thermal 80mm. Ganti ke 58mm jika perlu. */
-                size: 80mm auto; 
-                margin: 0;
-              }
-              body {
-                padding: 3mm;
-                font-family: monospace;
-                -webkit-print-color-adjust: exact; /* Memastikan warna tercetak di Chrome */
-                print-color-adjust: exact; /* Standar */
-              }
-              /* Salin semua style dari halaman utama */
-              ${styles}
-            </style>
-          </head>
-          <body>
-            ${printContent}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus(); // Fokus ke jendela baru
-
-      // 5. Panggil fungsi print dan tutup jendela setelah selesai.
-      // setTimeout memastikan konten sudah 100% dimuat sebelum dialog cetak muncul.
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 250); // Jeda 250ms sudah sangat aman.
-    } else {
-      alert('Gagal membuka jendela cetak. Pastikan pop-up tidak diblokir oleh browser Anda.');
+    // 1. Buka jendela baru yang kosong
+    const printWindow = window.open('', '_blank', 'height=600,width=800');
+    if (!printWindow) {
+      alert('Gagal membuka jendela cetak. Pastikan pop-up tidak diblokir.');
+      return;
     }
+
+    // 2. Ambil semua tag <link> dan <style> dari halaman utama.
+    // Ini cara yang lebih aman dan dijamin membawa semua style (termasuk Tailwind & Google Fonts).
+    const styleTags = document.querySelectorAll('link[rel="stylesheet"], style');
+    let stylesHtml = '';
+    styleTags.forEach(tag => {
+      stylesHtml += tag.outerHTML;
+    });
+
+    // 3. Ambil HTML dari komponen struk yang ingin dicetak.
+    const printContent = nodeToPrint.innerHTML;
+
+    // 4. Tulis struktur HTML lengkap ke jendela baru.
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Cetak Struk</title>
+          ${stylesHtml}
+          <style>
+            @page {
+              size: 80mm auto;
+              margin: 0;
+            }
+            body {
+              margin: 0;
+              padding: 3mm;
+              font-family: monospace;
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+
+    // 5. Gunakan `onload` untuk memastikan semua style sudah dimuat sebelum mencetak.
+    printWindow.onload = function() {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    };
   };
 
   if (!isOpen) {
@@ -92,7 +77,6 @@ export default function ReceiptModal({ isOpen, onClose, transactionData }: Recei
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
       <div className="bg-slate-100 p-6 rounded-xl shadow-2xl w-full max-w-xs">
         <h3 className="text-lg font-bold text-center mb-4">Transaksi Berhasil!</h3>
-        {/* Pratinjau di layar tidak berubah */}
         <div className="bg-white max-h-80 overflow-y-auto rounded-lg border">
           <ReceiptToPrint ref={receiptRef} transaction={transactionData} />
         </div>
